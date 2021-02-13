@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: 'rabbitmq:3.6-management-alpine'
+    command: rabbitmq-server
+    hostname: rabbit
+    expose:
+      - '5672'
+    environment:
+      RABBITMQ_DEFAULT_USER: 'guest'
+      RABBITMQ_DEFAULT_PASS: 'guest'
+
+  emailservice:
+    build: './email-service'
+    volumes:
+      - './home/services/emailservice'
+    links:
+      - rabbitmq
+    depends_on:
+      - rabbitmq
+
+  host:
+    build: './connection-service'
+    volumes:
+      - './home/services/host'
+    ports:
+      - '3000:3000'
+    links:
+      - rabbitmq
+    depends_on:
+      - rabbitmq
+
+  googleservice:
+    build: './google-service'
+    volumes:
+      - './home/services/googleservice'
+    links:
+      - rabbitmq
+    depends_on:
+      - rabbitmq
